@@ -32,8 +32,8 @@ public class MyRouteBuilder extends RouteBuilder {
 
         from("file:src/data?noop=true&fileName=input.txt")
                 .bean(PojoCreator.class)
-                .split(body())//.parallelProcessing()
-                .split().method(PojoSplitter.class, "splitBody")//.parallelProcessing()
+                .split(body()).parallelProcessing()
+                .split().method(PojoSplitter.class, "splitBody").parallelProcessing()
                 .log("${body}");
 /*
             .choice()

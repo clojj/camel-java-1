@@ -11,8 +11,6 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.mail.Flags;
 import javax.mail.Message;
@@ -23,8 +21,6 @@ import javax.mail.internet.MimeMessage;
 import java.security.Security;
 
 public class GreenMailReceiveTest extends CamelTestSupport {
-
-    Logger logger = LoggerFactory.getLogger(GreenMailReceiveTest.class);
 
     private static final String USER_PASSWORD = "abcdef123";
     private static final String USER_NAME = "hascode";
@@ -94,6 +90,9 @@ public class GreenMailReceiveTest extends CamelTestSupport {
         return new RouteBuilder() {
             public void configure() throws Exception {
 
+                context.setUseMDCLogging(true);
+                context.setUseBreadcrumb(true);
+
                 from("imaps://localhost:" + ServerSetupTest.IMAPS.getPort()
                         + "?username=" + USER_NAME + "&password=" + USER_PASSWORD
                         + "&delete=true&closeFolder=false&searchTerm.unseen=true")
@@ -103,7 +102,13 @@ public class GreenMailReceiveTest extends CamelTestSupport {
 */
                         .to("seda:start");
 
-                from("seda:start").threads(5)
+                from("seda:start").threads(10)
+                        .process(new Processor() {
+                            @Override
+                            public void process(Exchange exchange) throws Exception {
+                                Thread.sleep(1000);
+                            }
+                        })
                         .log("\nBODY PROCESSED: ${body}")
                         .to("mock:result");
 

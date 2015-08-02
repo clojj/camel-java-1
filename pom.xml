@@ -108,10 +108,19 @@
             <scope>test</scope>
         </dependency>
 
+        <!--
+                <dependency>
+                    <groupId>de.saly</groupId>
+                    <artifactId>javamail-mock2-fullmock</artifactId>
+                    <version>0.5-beta4</version>
+                    <scope>test</scope>
+                </dependency>
+        -->
+
         <dependency>
-            <groupId>de.saly</groupId>
-            <artifactId>javamail-mock2-fullmock</artifactId>
-            <version>0.5-beta4</version>
+            <groupId>com.icegreen</groupId>
+            <artifactId>greenmail</artifactId>
+            <version>1.4.1</version>
             <scope>test</scope>
         </dependency>
 

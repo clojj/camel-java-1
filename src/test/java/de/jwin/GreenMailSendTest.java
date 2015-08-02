@@ -44,7 +44,7 @@ public class GreenMailSendTest extends CamelTestSupport {
     }
 
     @Test
-    public void testSendAndReceiveMail() throws Exception {
+    public void testSendMail() throws Exception {
         Map<String, Object> headers = new HashMap() {{
             put("from", EMAIL_REPLY_ADDRESS);
         }};

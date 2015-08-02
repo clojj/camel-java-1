@@ -5,6 +5,8 @@ import com.icegreen.greenmail.util.DummySSLSocketFactory;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import org.apache.camel.EndpointInject;
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit4.CamelTestSupport;
@@ -45,6 +47,13 @@ public class GreenMailReceiveTest extends CamelTestSupport {
         user.deliver(createMessage());
         user.deliver(createMessage());
         user.deliver(createMessage());
+        user.deliver(createMessage());
+        user.deliver(createMessage());
+        user.deliver(createMessage());
+        user.deliver(createMessage());
+        user.deliver(createMessage());
+        user.deliver(createMessage());
+        user.deliver(createMessage());
     }
 
     private MimeMessage createMessage() throws MessagingException {
@@ -73,10 +82,9 @@ public class GreenMailReceiveTest extends CamelTestSupport {
     }
 
     @Test
-    public void testSendAndReceiveMail() throws Exception {
+    public void testReceiveMail() throws Exception {
         prepare();
-        resultEndpoint.expectedMessageCount(3);
-        resultEndpoint.expectedBodiesReceived(EMAIL_TEXT, EMAIL_TEXT, EMAIL_TEXT);
+        resultEndpoint.expectedMessageCount(10);
 
         resultEndpoint.assertIsSatisfied();
     }
@@ -89,9 +97,24 @@ public class GreenMailReceiveTest extends CamelTestSupport {
                 from("imaps://localhost:" + ServerSetupTest.IMAPS.getPort()
                         + "?username=" + USER_NAME + "&password=" + USER_PASSWORD
                         + "&delete=true&closeFolder=false&searchTerm.unseen=true")
-
+/*
                         .log("\nHEADERS ${headers}")
                         .log("\nBODY ${body}")
+*/
+                        .to("seda:start");
+
+                from("seda:start").threads(5)
+                        .log("\nBODY PROCESSED: ${body}")
+                        .to("mock:result");
+
+                from("direct:start")
+                        .process(new Processor() {
+                            @Override
+                            public void process(Exchange exchange) throws Exception {
+                                Thread.sleep(500);
+                            }
+                        })
+                        .log("\nBODY PROCESSED: ${body}")
                         .to("mock:result");
             }
         };

@@ -14,7 +14,9 @@ public class MainApp {
         Main main = new Main();
         main.enableHangupSupport();
         main.enableTrace();
+
         main.addRouteBuilder(new MyRouteBuilder());
+
         main.run(args);
     }
 

@@ -1,6 +1,7 @@
 package de.jwin;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.processor.interceptor.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +29,17 @@ public class MyRouteBuilder extends RouteBuilder {
 
         // here is a sample which processes the input files
         // (leaving them in place - see the 'noop' flag)
-        // then performs content based routing on the message using XPath
 
-        from("file:src/data?noop=true&fileName=input.txt")
+        PropertiesComponent pc = getContext().getComponent("properties", PropertiesComponent.class);
+        pc.setLocation("classpath:application.properties");
+
+        from("file:src/data?noop=true&fileName=input.txt&delay=1000&idempotentKey=${file:name}-${file:modified}")
                 .bean(PojoCreator.class)
                 .split(body()).parallelProcessing()
                 .split().method(PojoSplitter.class, "splitBody").parallelProcessing()
+                .to("{{my.output}}");
+
+        from("direct:my-output")
                 .log("${body}");
 /*
             .choice()

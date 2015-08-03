@@ -20,12 +20,7 @@ public class MyRouteBuilder extends RouteBuilder {
 
         logger.debug("configure routes...");
 
-        Tracer tracer = new Tracer();
-        tracer.getDefaultTraceFormatter().setShowExchangeId(true);
-        tracer.getDefaultTraceFormatter().setShowBodyType(true);
-        tracer.getDefaultTraceFormatter().setShowBreadCrumb(false);
-        tracer.getDefaultTraceFormatter().setShowNode(false);
-        getContext().addInterceptStrategy(tracer);
+//        configureTracer();
 
         // here is a sample which processes the input files
         // (leaving them in place - see the 'noop' flag)
@@ -33,7 +28,8 @@ public class MyRouteBuilder extends RouteBuilder {
         PropertiesComponent pc = getContext().getComponent("properties", PropertiesComponent.class);
         pc.setLocation("classpath:application.properties");
 
-        from("file:src/data?noop=true&fileName=input.txt&delay=1000&idempotentKey=${file:name}-${file:modified}")
+        from("stream:file?fileName=src/data/input.txt&scanStream=true&scanStreamDelay=1000")
+//        from("file:src/data?noop=true&fileName=input.txt&delay=1000&idempotentKey=${file:name}-${file:modified}")
                 .bean(PojoCreator.class)
                 .split(body()).parallelProcessing()
                 .split().method(PojoSplitter.class, "splitBody").parallelProcessing()
@@ -50,6 +46,15 @@ public class MyRouteBuilder extends RouteBuilder {
                     .log("Other message")
                     .to("file:target/messages/others");
 */
+    }
+
+    private void configureTracer() {
+        Tracer tracer = new Tracer();
+        tracer.getDefaultTraceFormatter().setShowExchangeId(true);
+        tracer.getDefaultTraceFormatter().setShowBodyType(true);
+        tracer.getDefaultTraceFormatter().setShowBreadCrumb(false);
+        tracer.getDefaultTraceFormatter().setShowNode(false);
+        getContext().addInterceptStrategy(tracer);
     }
 
 }
